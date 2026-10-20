@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Resume Analyzer & Job Matcher — Complete Engineering Guide</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-card: #243247;
+            --border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --code-bg: #0b1120;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.65;
+            scroll-behavior: smooth;
+        }
+
+        /* Top Navbar */
+        header.top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 800;
+            font-size: 1.25rem;
+            letter-spacing: -0.025em;
+            color: #fff;
+        }
+
+        .brand-badge {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 0.25rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.25rem;
+            list-style: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        .btn-live {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 0.45rem 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn-live:hover {
+            opacity: 0.9;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+        }
+
+        /* Hero Banner */
+        .hero {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid var(--border);
+            border-radius: 1.25rem;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.25) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(to right, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p.tagline {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            max-width: 720px;
+            margin: 0 auto 1.5rem auto;
+        }
+
+        .hero-tags {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag-pill {
+            background: var(--surface-card);
+            border: 1px solid var(--border);
+            padding: 0.3rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        /* Section Headings */
+        section {
+            margin-bottom: 3.5rem;
+        }
+
+        .section-header {
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #f1f5f9;
+        }
+
+        .section-header .step-badge {
+            background: var(--primary);
+            color: #fff;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+        }
+
+        /* Cards and Grids */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: #475569;
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Callout / Alerts */
+        .callout {
+            border-left: 4px solid var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+            padding: 1.25rem 1.5rem;
+            border-radius: 0 0.75rem 0.75rem 0;
+            margin: 1.5rem 0;
+        }
+
+        .callout.success {
+            border-left-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .callout.warning {
+            border-left-color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .callout-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+            color: #fff;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            overflow-x: auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.85rem;
+            color: #38bdf8;
+            margin: 1rem 0;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            background: var(--surface-card);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.3rem;
+            font-size: 0.85em;
+            color: #38bdf8;
+        }
+
+        pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
+        }
+
+        /* Tables */
+        .table-responsive {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            background: var(--surface);
+            margin: 1.25rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.8);
+            color: #e2e8f0;
+            font-weight: 700;
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 0.875rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            color: #cbd5e1;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(51, 65, 85, 0.3);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-student { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #059669; }
+        .badge-recruiter { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #2563eb; }
+        .badge-admin { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #7c3aed; }
+
+        /* Formula Box */
+        .math-box {
+            background: #0f172a;
+            border: 1px dashed #3b82f6;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            font-family: ui-monospace, SFMono-Regular, monospace;
+            color: #e2e8f0;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Print styles */
+        @media print {
+            body { background: #fff; color: #000; }
+            header.top-nav { display: none; }
+            .card, pre, .table-responsive { border: 1px solid #ccc; background: #fff; color: #000; }
+            code { color: #000; background: #eee; }
+            .hero { background: #f8fafc; border: 1px solid #ccc; }
+            .hero h1 { -webkit-text-fill-color: #000; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation -->
+    <header class="top-nav">
+        <div class="brand">
+            <span>⚡ ResumeAI</span>
+            <span class="brand-badge">Full-Stack Lab</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#quick-start">Quick Start</a></li>
+            <li><a href="#accounts">Test Accounts</a></li>
+            <li><a href="#math-algorithm">Algorithms</a></li>
+            <li><a href="#portals">Role Portals</a></li>
+            <li><a href="#api">API Reference</a></li>
+            <li><a href="#viva">Viva Q&A</a></li>
+        </ul>
+        <a href="http://localhost:5173" target="_blank" class="btn-live">Open Web App →</a>
+    </header>
+
+    <div class="container">
+
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>AI-Powered Resume Analyzer & Job Matcher</h1>
+            <p class="tagline">"Analyze Your Resume. Discover Your Potential. Find Your Perfect Career Match."</p>
+            <div class="hero-tags">
+                <span class="tag-pill">Java 21 LTS</span>
+                <span class="tag-pill">Spring Boot 3.2.5</span>
+                <span class="tag-pill">React 19 &amp; Vite</span>
+                <span class="tag-pill">Tailwind CSS</span>
+                <span class="tag-pill">Apache PDFBox &amp; POI</span>
+                <span class="tag-pill">Pure Java TF-IDF</span>
+                <span class="tag-pill">MySQL 8 &amp; H2 Dual-Profile</span>
+            </div>
+        </div>
+
+        <!-- Section 1: Quick Links & Running System -->
+        <section id="quick-start">
+            <div class="section-header">
+                <div class="step-badge">1</div>
+                <h2>Live Services & Quick Start</h2>
+            </div>
+
+            <div class="grid-3">
+                <div class="card">
+                    <h3>🌐 Web Frontend</h3>
+                    <p>Vite + React Single-Page Application with dark navy SaaS design and instant proxy to backend.</p>
+                    <p style="margin-top: 1rem;"><a href="http://localhost:5173" target="_blank" style="color: #60a5fa; font-weight: 700; text-decoration: none;">http://localhost:5173 ↗</a></p>
+                </div>
+                <div class="card">
+                    <h3>⚡ Spring Boot API</h3>
+                    <p>Core REST API gateway on port 8080 with stateless JWT authentication and Actuator telemetry.</p>
+                    <p style="margin-top: 1rem;"><a href="http://localhost:8080/api/health" target="_blank" style="color: #34d399; font-weight: 700; text-decoration: none;">http://localhost:8080/api/health ↗</a></p>
+                </div>
+                <div class="card">
+                    <h3>📖 Swagger / OpenAPI</h3>
+                    <p>Interactive API playground documenting all endpoints, parameters, and JSON payloads.</p>
+                    <p style="margin-top: 1rem;"><a href="http://localhost:8080/swagger-ui.html" target="_blank" style="color: #c084fc; font-weight: 700; text-decoration: none;">http://localhost:8080/swagger-ui.html ↗</a></p>
+                </div>
+            </div>
+
+            <div class="callout success">
+                <div class="callout-title">✅ Services Are Already Active!</div>
+                The backend service is currently running on <strong>port 8080</strong> and the frontend dev server is running on <strong>port 5173</strong>. You can simply click <a href="http://localhost:5173" target="_blank" style="color:#60a5fa; text-decoration:underline; font-weight:700;">http://localhost:5173</a> to open the application!
+            </div>
+
+            <h3 style="margin-top: 2rem; margin-bottom: 0.75rem; font-size: 1.15rem;">How to Restart Services Manually (PowerShell):</h3>
+            <pre><code># 1. Start Spring Boot Backend (Port 8080)
+$env:JAVA_HOME = "C:\Users\moksh\.jdks\jdk-21.0.12.1+1"
+$env:Path = "$env:JAVA_HOME\bin;" + $env:Path
+cd "c:\Users\moksh\OneDrive\Desktop\java project\backend"
+java -jar target\ai-resume-analyzer-backend-1.0.0.jar
+
+# 2. Start React Frontend Dev Server (Port 5173)
+cd "c:\Users\moksh\OneDrive\Desktop\java project\frontend"
+npm run dev</code></pre>
+        </section>
+
+        <!-- Section 2: Default Test Credentials & Sample Files -->
+        <section id="accounts">
+            <div class="section-header">
+                <div class="step-badge">2</div>
+                <h2>Pre-Configured Test Accounts & Sample Resumes</h2>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Portal Role</th>
+                            <th>Email Address</th>
+                            <th>Password</th>
+                            <th>Access Scope &amp; Features Available</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-student">Student</span></td>
+                            <td><code>student@test.com</code></td>
+                            <td><code>Password@123</code></td>
+                            <td>Upload PDF/DOCX resumes, view 0–100 rubric score, run explainable job matcher, inspect 5-phase career gap roadmap, and apply to vacancies.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-recruiter">Recruiter</span></td>
+                            <td><code>recruiter@tech.com</code></td>
+                            <td><code>Password@123</code></td>
+                            <td>Publish new jobs, manage company listings, view applicants ranked by match score, inspect candidate profiles, and Shortlist/Review/Reject.</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-admin">Admin</span></td>
+                            <td><code>admin@resumeanalyzer.com</code></td>
+                            <td><code>Admin@123456</code></td>
+                            <td>Platform analytics dashboard, toggle user suspension/activation, delete users, audit jobs, edit NLP canonical skills and aliases.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.15rem;">Sample Resumes Ready for Immediate Testing:</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem;">Located directly inside the <code>samples/</code> folder in your project workspace:</p>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>📄 John_Doe_FullStack_Resume.pdf</h3>
+                    <p>High-scoring senior full-stack candidate with Java 21, Spring Boot, React, Docker, Kubernetes, MySQL, and REST microservices.</p>
+                </div>
+                <div class="card">
+                    <h3>📄 Jane_Smith_Junior_Developer.docx</h3>
+                    <p>Junior engineering graduate profile in Microsoft Word format (.docx) with Java, MySQL, HTML, CSS, and Spring fundamentals.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Explainable Matching & Mathematical Algorithms -->
+        <section id="math-algorithm">
+            <div class="section-header">
+                <div class="step-badge">3</div>
+                <h2>Explainable Matching &amp; Scoring Algorithms</h2>
+            </div>
+
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                Unlike black-box opaque AI systems, this platform implements a <strong>transparent, explainable weighted scoring formula</strong> computed directly in Java with dynamic weight redistribution.
+            </p>
+
+            <div class="math-box">
+                <strong>COMPOSITE JOB MATCH FORMULA:</strong><br><br>
+                Final Score = (40% × Required Skills Match)<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (20% × Preferred Skills Match)<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (20% × TF-IDF Semantic Cosine Similarity)<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (10% × Experience Alignment Match)<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ (10% × Education / Degree Match)
+            </div>
+
+            <div class="callout warning">
+                <div class="callout-title">⚖️ Dynamic Weight Redistribution (Fairness Guarantee)</div>
+                If a job vacancy does not specify optional criteria (such as no preferred skills or no minimum years of experience), the engine <strong>does not penalize the candidate with 0 points</strong>. Instead, it dynamically redistributes unassigned weights proportionally across the active categories so that total active weight always equals 100%.
+            </div>
+
+            <h3 style="margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.15rem;">Deterministic Quality Scoring Rubric (0 to 100):</h3>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Quality Dimension</th>
+                            <th>Max Points</th>
+                            <th>Evaluation Rules</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1. Completeness</strong></td>
+                            <td>20 pts</td>
+                            <td>Presence of Name, Email, Phone, Education, Skills, and Summary sections (3-4 pts each).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2. Technical Skill Breadth</strong></td>
+                            <td>20 pts</td>
+                            <td>Number of verified technical competencies (5+ skills = 10 pts, 10+ = 15 pts, 15+ = 20 pts).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3. Education Information</strong></td>
+                            <td>15 pts</td>
+                            <td>Explicit degree title, university name, graduation year, and CGPA/grade.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4. Work Experience</strong></td>
+                            <td>15 pts</td>
+                            <td>Presence of engineering internships, roles, company names, and quantified bullets.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5. Applied Projects</strong></td>
+                            <td>15 pts</td>
+                            <td>At least two portfolio projects showcasing practical software development.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>6. Formatting &amp; Length</strong></td>
+                            <td>10 pts</td>
+                            <td>Optimal document length (250 to 1,200 words) conforming to standard 1–2 page hiring conventions.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>7. Keyword Relevance</strong></td>
+                            <td>5 pts</td>
+                            <td>Industry engineering keywords (e.g. CI/CD, Git, testing, microservices, cloud).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top: 1.5rem; margin-bottom: 0.75rem; font-size: 1.15rem;">NLP Skill Normalization &amp; Alias Mapping:</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.75rem;">
+                The parser uses regex boundary matching (<code>\b</code>) across a dictionary of 150+ competencies to map informal terms to their canonical name:
+            </p>
+            <div class="grid-3">
+                <div class="card">
+                    <code>SpringBoot</code> / <code>spring-boot</code><br>
+                    <strong>&rarr; Spring Boot</strong>
+                </div>
+                <div class="card">
+                    <code>JS</code> / <code>ecmascript</code><br>
+                    <strong>&rarr; JavaScript</strong>
+                </div>
+                <div class="card">
+                    <code>K8s</code> / <code>kubernetes</code><br>
+                    <strong>&rarr; Kubernetes</strong>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Role Portals Walkthrough -->
+        <section id="portals">
+            <div class="section-header">
+                <div class="step-badge">4</div>
+                <h2>Functional Role Portals Walkthrough</h2>
+            </div>
+
+            <div class="grid-3">
+                <!-- Student -->
+                <div class="card">
+                    <h3>🎓 Student Portal</h3>
+                    <ul style="padding-left: 1.25rem; font-size: 0.85rem; color: #cbd5e1; space-y: 0.5rem;">
+                        <li><strong>Upload Resume:</strong> Drag-and-drop PDF or DOCX file (up to 5 MB).</li>
+                        <li><strong>Review &amp; Edit:</strong> Human-in-the-loop review of extracted text &amp; skills before saving.</li>
+                        <li><strong>Resume Analyzer:</strong> Inspect 0–100 quality score, strengths, and weaknesses.</li>
+                        <li><strong>Job Matcher:</strong> Compare against 7 seeded engineering jobs or paste custom job specs.</li>
+                        <li><strong>Skill Gap Roadmap:</strong> View 5-phase customized learning pathway with project ideas.</li>
+                        <li><strong>Job Recommendations:</strong> Browse vacancies sorted by match score and apply with 1 click.</li>
+                    </ul>
+                </div>
+
+                <!-- Recruiter -->
+                <div class="card">
+                    <h3>🏢 Recruiter Portal</h3>
+                    <ul style="padding-left: 1.25rem; font-size: 0.85rem; color: #cbd5e1; space-y: 0.5rem;">
+                        <li><strong>Post Vacancies:</strong> Create openings with required/preferred skills, salary, and remote/hybrid modes.</li>
+                        <li><strong>Manage Jobs:</strong> Edit existing vacancies or remove closed openings.</li>
+                        <li><strong>Candidate Review:</strong> Inspect submitted candidate applications ranked by match score.</li>
+                        <li><strong>Profile Modal:</strong> View candidate's verified skills, experience, and education details.</li>
+                        <li><strong>Shortlist Controls:</strong> Transition application status to Shortlisted, Reviewed, or Rejected with recruiter notes.</li>
+                    </ul>
+                </div>
+
+                <!-- Admin -->
+                <div class="card">
+                    <h3>🛡️ Admin Console</h3>
+                    <ul style="padding-left: 1.25rem; font-size: 0.85rem; color: #cbd5e1; space-y: 0.5rem;">
+                        <li><strong>Platform Analytics:</strong> Live counts of users, students, recruiters, and resumes analyzed.</li>
+                        <li><strong>User Management:</strong> Paginated user directory with search; activate, suspend, or delete accounts.</li>
+                        <li><strong>Job Moderation:</strong> Audit all job postings across the platform and delete inappropriate listings.</li>
+                        <li><strong>Skill Taxonomy:</strong> Add new technical skills and configure aliases (e.g. <code>kt &rarr; Kotlin</code>).</li>
+                        <li><strong>System Telemetry:</strong> Live Spring Boot actuator health metrics and JVM status.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: REST API Reference -->
+        <section id="api">
+            <div class="section-header">
+                <div class="step-badge">5</div>
+                <h2>REST API Endpoints Catalog</h2>
+            </div>
+
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                All protected endpoints require <code>Authorization: Bearer &lt;jwt_token&gt;</code>. Complete interactive documentation is accessible at <a href="http://localhost:8080/swagger-ui.html" target="_blank" style="color:#60a5fa;">http://localhost:8080/swagger-ui.html</a>.
+            </p>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>Endpoint URI</th>
+                            <th>Access Role</th>
+                            <th>Purpose &amp; Payload</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code style="color:#60a5fa;">POST</code></td>
+                            <td><code>/api/auth/register</code></td>
+                            <td>Public</td>
+                            <td>Register new Student or Recruiter account with BCrypt password hashing.</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color:#60a5fa;">POST</code></td>
+                            <td><code>/api/auth/login</code></td>
+                            <td>Public</td>
+                            <td>Authenticate user credentials and generate HMAC-SHA384 signed JWT token.</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color:#60a5fa;">POST</code></td>
+                            <td><code>/api/resumes/upload</code></td>
+                            <td>STUDENT</td>
+                            <td>Upload PDF/DOCX file via multipart form; triggers Apache PDFBox/POI parser.</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color:#34d399;">GET</code></td>
+                            <td><code>/api/resumes/{id}/extracted</code></td>
+                            <td>STUDENT</td>
+                            <td>Retrieve parsed contact info, skills, education, and experience arrays.</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color:#60a5fa;">POST</code></td>
+                            <td><code>/api/analysis/resume/{id}</code></td>
+                            <td>STUDENT</td>
+                            <td>Execute deterministic 0–100 quality scoring across 7 rubric categories.</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color:#60a5fa;">POST</code></td>
+                            <td><code>/api/matching/analyze</code></td>
+                            <td>STUDENT</td>
+                            <td>Calculate explainable match score comparing resume with job posting.</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color:#34d399;">GET</code></td>
+                            <td><code>/api/matching/skill-gap</code></td>
+                            <td>STUDENT</td>
+                            <td>Generate 5-phase career progression roadmap and portfolio project ideas.</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color:#34d399;">GET</code></td>
+                            <td><code>/api/matching/recommendations</code></td>
+                            <td>STUDENT</td>
+                            <td>Retrieve platform vacancies sorted in descending order of match percentage.</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color:#60a5fa;">POST</code></td>
+                            <td><code>/api/jobs/{id}/apply</code></td>
+                            <td>STUDENT</td>
+                            <td>Submit job application with attached resume and optional cover letter.</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color:#34d399;">GET</code></td>
+                            <td><code>/api/recruiter/jobs/{id}/applications</code></td>
+                            <td>RECRUITER</td>
+                            <td>List candidate submissions for a specific job with match scores and status.</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color:#f59e0b;">PUT</code></td>
+                            <td><code>/api/recruiter/applications/{id}/status</code></td>
+                            <td>RECRUITER</td>
+                            <td>Update candidate status to SHORTLISTED, REVIEWED, or REJECTED.</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color:#34d399;">GET</code></td>
+                            <td><code>/api/admin/analytics</code></td>
+                            <td>ADMIN</td>
+                            <td>Aggregated platform metrics (Total Users, Resumes Analyzed, Active Jobs).</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color:#34d399;">GET</code></td>
+                            <td><code>/api/health</code></td>
+                            <td>Public</td>
+                            <td>Actuator system health status (returns <code>status: UP</code>).</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 6: Database Design -->
+        <section id="database">
+            <div class="section-header">
+                <div class="step-badge">6</div>
+                <h2>Database Architecture &amp; Entities</h2>
+            </div>
+
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                The platform utilizes a relational database architecture with strict foreign key constraints, cascading rules, and dual-profile compatibility (MySQL 8 / persistent H2-MySQL):
+            </p>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>👥 Core User &amp; Profile Tables</h3>
+                    <ul style="padding-left: 1.25rem; font-size: 0.85rem; color: #cbd5e1;">
+                        <li><code>users</code> — ID, unique email, BCrypt password, full name, role (STUDENT, RECRUITER, ADMIN), active status.</li>
+                        <li><code>student_profiles</code> — One-to-one link to student user; target job title, degree, CGPA, graduation year.</li>
+                        <li><code>recruiter_profiles</code> — One-to-one link to recruiter user; company name, website, designation.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>📄 Resume &amp; Parser Tables</h3>
+                    <ul style="padding-left: 1.25rem; font-size: 0.85rem; color: #cbd5e1;">
+                        <li><code>resumes</code> — Document metadata, UUID stored filename, file size, content type, upload timestamp.</li>
+                        <li><code>extracted_resume_data</code> — Parsed candidate name, email, raw text, and JSON lists of skills, experience, and education.</li>
+                        <li><code>skills</code> — Technical taxonomy dictionary with canonical name, category, and alias synonyms.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>💼 Job &amp; Application Tables</h3>
+                    <ul style="padding-left: 1.25rem; font-size: 0.85rem; color: #cbd5e1;">
+                        <li><code>jobs</code> — Job title, company name, location, work mode (REMOTE/HYBRID/ONSITE), salary, required and preferred skills.</li>
+                        <li><code>job_applications</code> — Unique composite constraint on (job_id, student_id), match score, status, cover letter, recruiter notes.</li>
+                        <li><code>saved_jobs</code> — Bookmark table for students to save vacancies for later.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h3>📊 Scoring &amp; Analysis Tables</h3>
+                    <ul style="padding-left: 1.25rem; font-size: 0.85rem; color: #cbd5e1;">
+                        <li><code>resume_analyses</code> — Historical record of 0–100 quality scores, category subscores, strengths, weaknesses, and improvement tips.</li>
+                        <li><code>job_match_results</code> — Historical record of calculated match scores, component breakdown, matching skills, and formula explanations.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Viva Voce & Lab Evaluation Q&A -->
+        <section id="viva">
+            <div class="section-header">
+                <div class="step-badge">7</div>
+                <h2>University Viva Voce &amp; Lab Presentation Q&amp;A</h2>
+            </div>
+
+            <div class="card" style="margin-bottom: 1rem;">
+                <h3 style="color: #60a5fa;">Q1: Why did you implement TF-IDF and Cosine Similarity in pure Java instead of using Python?</h3>
+                <p>
+                    <strong>Answer:</strong> Implementing the text processing, vectorization, and cosine math directly in Java eliminates the need for an external Python subprocess or microservice. This guarantees zero network latency between services, eliminates cross-language serialization overhead, avoids external server dependencies, and ensures the entire application runs natively on the JVM using standard Java collections.
+                </p>
+            </div>
+
+            <div class="card" style="margin-bottom: 1rem;">
+                <h3 style="color: #60a5fa;">Q2: How does the system handle resumes with different skill aliases (e.g., "JS" vs "JavaScript")?</h3>
+                <p>
+                    <strong>Answer:</strong> The platform maintains a canonical skill taxonomy in the <code>SkillExtractionService</code> containing over 150 technical competencies. Each skill possesses an array of known aliases and synonyms. The tokenization engine uses boundary-aware regex matching to detect aliases in the extracted text stream and automatically normalizes them to their canonical name. Substring false-positives (such as matching "Java" inside "JavaScript") are prevented using word-boundary assertions.
+                </p>
+            </div>
+
+            <div class="card" style="margin-bottom: 1rem;">
+                <h3 style="color: #60a5fa;">Q3: What happens if a job description doesn't specify preferred skills or required experience?</h3>
+                <p>
+                    <strong>Answer:</strong> The system applies dynamic weight redistribution. Instead of awarding 0 points or penalizing the student, the calculator identifies only the active criteria and redistributes the unassigned weights proportionally across the remaining categories so that total active weight still sums to 100%.
+                </p>
+            </div>
+
+            <div class="card">
+                <h3 style="color: #60a5fa;">Q4: How does the application ensure data privacy and prevent unauthorized resume access?</h3>
+                <p>
+                    <strong>Answer:</strong> Resumes are stored on disk using randomized UUID filenames outside the web context root, preventing direct URL access. File endpoints are protected by Spring Security 6 with stateless JWT tokens. A student can only access their own uploaded resumes. Recruiters cannot access a student's resume document unless the candidate explicitly submits an application to that recruiter's job opening.
+                </p>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p><strong>AI-Powered Resume Analyzer &amp; Job Matcher</strong> — University Full-Stack Java Laboratory Project</p>
+        <p style="margin-top: 0.5rem; color: #64748b;">Engineered with Java 21, Spring Boot 3, React 19, Tailwind CSS, Apache PDFBox, and Apache POI.</p>
+    </footer>
+
+</body>
+</html>
