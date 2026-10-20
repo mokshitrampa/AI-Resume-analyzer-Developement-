@@ -275,13 +275,13 @@ const StudentDashboard = () => {
                   <p className="text-xs text-slate-500 font-medium mb-3">{job.companyName} • {job.location}</p>
 
                   <div className="flex flex-wrap gap-1 mb-4">
-                    {job.requiredSkills.slice(0, 3).map((s) => (
+                    {(job.requiredSkills || []).slice(0, 3).map((s) => (
                       <span key={s} className="px-2 py-0.5 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300">
                         {s}
                       </span>
                     ))}
-                    {job.requiredSkills.length > 3 && (
-                      <span className="text-[11px] text-slate-400 px-1">+{job.requiredSkills.length - 3}</span>
+                    {(job.requiredSkills || []).length > 3 && (
+                      <span className="text-[11px] text-slate-400 px-1">+{(job.requiredSkills || []).length - 3}</span>
                     )}
                   </div>
                 </div>

@@ -43,15 +43,15 @@ public class StudentService {
         this.jobService = jobService;
     }
 
+    @Transactional(readOnly = true)
     public Map<String, Object> getDashboardData(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        StudentProfile profile = studentProfileRepository.findByUserId(userId)
-                .orElseGet(() -> studentProfileRepository.save(new StudentProfile(user)));
+        StudentProfile profile = studentProfileRepository.findByUserId(userId).orElse(null);
 
         List<Resume> resumes = resumeRepository.findByUserIdOrderByCreatedAtDesc(userId);
-        Resume latestResume = resumes.isEmpty() ? null : resumes.get(0);
+        Resume latestResume = (resumes != null && !resumes.isEmpty()) ? resumes.get(0) : null;
 
         ResumeAnalysis latestAnalysis = null;
         ExtractedResumeData extractedData = null;
@@ -60,17 +60,38 @@ public class StudentService {
             extractedData = extractedResumeDataRepository.findByResumeId(latestResume.getId()).orElse(null);
         }
 
-        List<JobMatchResult> recentMatches = jobMatchResultRepository.findByResumeUserIdOrderByMatchedAtDesc(userId);
-        List<JobDto> savedJobs = jobService.getSavedJobs(userId);
+        List<JobMatchResult> recentMatches = Collections.emptyList();
+        try {
+            recentMatches = jobMatchResultRepository.findByResumeUserIdOrderByMatchedAtDesc(userId);
+        } catch (Exception ignored) {}
+
+        List<JobDto> savedJobs = Collections.emptyList();
+        try {
+            savedJobs = jobService.getSavedJobs(userId);
+        } catch (Exception ignored) {}
 
         Map<String, Object> response = new HashMap<>();
-        response.put("user", Map.of(
-                "fullName", user.getFullName(),
-                "email", user.getEmail(),
-                "role", user.getRole().name()
-        ));
-        response.put("profile", profile);
-        response.put("totalResumes", resumes.size());
+
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("fullName", user.getFullName() != null ? user.getFullName() : "Student");
+        userMap.put("email", user.getEmail() != null ? user.getEmail() : "");
+        userMap.put("role", user.getRole() != null ? user.getRole().name() : "STUDENT");
+        response.put("user", userMap);
+
+        Map<String, Object> profileMap = new HashMap<>();
+        if (profile != null) {
+            profileMap.put("id", profile.getId());
+            profileMap.put("bio", profile.getBio());
+            profileMap.put("currentDegree", profile.getCurrentDegree());
+            profileMap.put("institution", profile.getInstitution());
+            profileMap.put("graduationYear", profile.getGraduationYear());
+            profileMap.put("cgpa", profile.getCgpa());
+            profileMap.put("targetJobTitle", profile.getTargetJobTitle());
+            profileMap.put("resumeCount", profile.getResumeCount());
+        }
+        response.put("profile", profileMap);
+
+        response.put("totalResumes", resumes != null ? resumes.size() : 0);
         response.put("latestResume", latestResume != null ? new ResumeResponseDto(
                 latestResume.getId(), latestResume.getOriginalFilename(), latestResume.getFileType(),
                 latestResume.getFileSize(), latestResume.getVersion(), latestResume.getCreatedAt()
@@ -123,8 +144,8 @@ public class StudentService {
             response.put("recommendedJobs", Collections.emptyList());
         }
 
-        response.put("savedJobsCount", savedJobs.size());
-        response.put("recentMatchesCount", recentMatches.size());
+        response.put("savedJobsCount", savedJobs != null ? savedJobs.size() : 0);
+        response.put("recentMatchesCount", recentMatches != null ? recentMatches.size() : 0);
 
         return response;
     }
