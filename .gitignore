@@ -26,6 +26,7 @@ replay_pid*
 # Maven target
 target/
 backend/target/
+javafx-app/target/
 frontend/dist/
 
 # Node modules
@@ -35,6 +36,7 @@ frontend/node_modules/
 # Local databases
 data/
 backend/data/
+javafx-app/data/
 *.db
 *.h2.db
 
